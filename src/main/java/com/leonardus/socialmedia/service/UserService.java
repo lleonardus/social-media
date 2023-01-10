@@ -1,8 +1,6 @@
 package com.leonardus.socialmedia.service;
 
-import com.leonardus.socialmedia.dtos.CommentDTO;
-import com.leonardus.socialmedia.dtos.PostDTO;
-import com.leonardus.socialmedia.dtos.UserDTO;
+import com.leonardus.socialmedia.dtos.*;
 import com.leonardus.socialmedia.entities.Comment;
 import com.leonardus.socialmedia.entities.Post;
 import com.leonardus.socialmedia.entities.User;
@@ -36,24 +34,23 @@ public class UserService {
         return mapper.map(user, UserDTO.class);
     }
 
-    public UserDTO create(UserDTO userDTO){
-        this.isEmailUnique(userDTO);
+    public UserDTO create(UserInsertDTO userInsertDTO){
+        this.isEmailUnique(userInsertDTO);
         User user = User.builder()
-                .name(userDTO.getName())
-                .email(userDTO.getEmail())
+                .name(userInsertDTO.getName())
+                .email(userInsertDTO.getEmail())
                 .build();
 
         return mapper.map(userRepository.save(user), UserDTO.class);
     }
 
-    public UserDTO update(Long userId, UserDTO userDTO){
+    public UserDTO update(Long userId, UserInsertDTO userInsertDTO){
         User user = this.findByIdOrElseThrowObjectNotFoundException(userId);
 
-        userDTO.setId(userId);
-        this.isEmailUnique(userDTO);
-
-        user.setName(userDTO.getName());
-        user.setEmail(userDTO.getEmail());
+        userInsertDTO.setId(userId);
+        this.isEmailUnique(userInsertDTO);
+        user.setName(userInsertDTO.getName());
+        user.setEmail(userInsertDTO.getEmail());
         userRepository.save(user);
 
         return mapper.map(user, UserDTO.class);
@@ -69,9 +66,9 @@ public class UserService {
                 .map(post -> mapper.map(post, PostDTO.class)).toList();
     }
 
-    public PostDTO createPost(Long userId, PostDTO postDTO){
+    public PostDTO createPost(Long userId, PostInsertDTO postInsertDTO){
         User user = this.findByIdOrElseThrowObjectNotFoundException(userId);
-        Post post = postRepository.save(mapper.map(postDTO, Post.class));
+        Post post = postRepository.save(mapper.map(postInsertDTO, Post.class));
 
         user.getPosts().add(post);
         userRepository.save(user);
@@ -84,11 +81,11 @@ public class UserService {
                 .map(comment -> mapper.map(comment, CommentDTO.class)).toList();
     }
 
-    public CommentDTO createComment(Long userId, Long postId, CommentDTO commentDTO){
+    public CommentDTO createComment(Long userId, Long postId, CommentInsertDTO commentInsertDTO){
         User user = findByIdOrElseThrowObjectNotFoundException(userId);
         Post post = postRepository.findById(postId).orElseThrow(() -> new ObjectNotFoundException("Post not found"));
 
-        Comment comment = commentRepository.save(mapper.map(commentDTO, Comment.class));
+        Comment comment = commentRepository.save(mapper.map(commentInsertDTO, Comment.class));
 
         user.getComments().add(comment);
         userRepository.save(user);
@@ -104,10 +101,10 @@ public class UserService {
                 .orElseThrow(() -> new ObjectNotFoundException("Could not find user"));
     }
 
-    private void isEmailUnique(UserDTO userDTO){
-        Optional<User> user = userRepository.findByEmail(userDTO.getEmail());
+    private void isEmailUnique(UserInsertDTO userInsertDTO){
+        Optional<User> user = userRepository.findByEmail(userInsertDTO.getEmail());
 
-        if (user.isPresent() && !user.get().getId().equals(userDTO.getId())){
+        if (user.isPresent() && !user.get().getId().equals(userInsertDTO.getId())){
             throw new DataIntegrityViolationException("Email is already registered");
         }
     }

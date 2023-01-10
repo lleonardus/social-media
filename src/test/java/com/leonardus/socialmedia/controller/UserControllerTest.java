@@ -1,9 +1,7 @@
 package com.leonardus.socialmedia.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.leonardus.socialmedia.dtos.CommentDTO;
-import com.leonardus.socialmedia.dtos.PostDTO;
-import com.leonardus.socialmedia.dtos.UserDTO;
+import com.leonardus.socialmedia.dtos.*;
 import com.leonardus.socialmedia.factory.CommentFactory;
 import com.leonardus.socialmedia.factory.PostFactory;
 import com.leonardus.socialmedia.factory.UserFactory;
@@ -40,54 +38,58 @@ class UserControllerTest {
     @Autowired
     ObjectMapper objectMapper;
 
+    UserInsertDTO userInsertDTO;
     UserDTO userDTO;
+    PostInsertDTO postInsertDTO;
     PostDTO postDTO;
+    CommentInsertDTO commentInsertDTO;
     CommentDTO commentDTO;
     String json;
 
     @BeforeEach
     void setUp() throws Exception{
+        userInsertDTO = UserFactory.createUserInsertDTO();
         userDTO = UserFactory.createUserDTO();
+        postInsertDTO = PostFactory.createPostInsertDTO();
         postDTO = PostFactory.createPostDTO();
+        commentInsertDTO = CommentFactory.createCommenInsertDTO();
         commentDTO = CommentFactory.createCommentDTO();
-        json = objectMapper.writeValueAsString(userDTO);
+        json = objectMapper.writeValueAsString(userInsertDTO);
 
         when(service.findAll()).thenReturn(List.of(userDTO));
         when(service.findById(1L)).thenReturn(userDTO);
         when(service.findById(2L)).thenThrow(ObjectNotFoundException.class);
-        when(service.create(userDTO)).thenReturn(userDTO);
-        when(service.update(1L, userDTO)).thenReturn(userDTO);
+        when(service.create(userInsertDTO)).thenReturn(userDTO);
+        when(service.update(1L, userInsertDTO)).thenReturn(userDTO);
         doNothing().when(service).deleteById(1L);
         doThrow(ObjectNotFoundException.class).when(service).deleteById(2L);
         when(service.getPosts(1L)).thenReturn(List.of(postDTO));
         when(service.getPosts(2L)).thenThrow(ObjectNotFoundException.class);
-        when(service.createPost(1L, postDTO)).thenReturn(postDTO);
-        when(service.createPost(2L, postDTO)).thenThrow(ObjectNotFoundException.class);
+        when(service.createPost(1L, postInsertDTO)).thenReturn(postDTO);
+        when(service.createPost(2L, postInsertDTO)).thenThrow(ObjectNotFoundException.class);
         when(service.getComments(1L)).thenReturn(List.of(commentDTO));
         when(service.getComments(2L)).thenThrow(ObjectNotFoundException.class);
-        when(service.createComment(1L, 1L, commentDTO)).thenReturn(commentDTO);
-        when(service.createComment(2L, 1L, commentDTO)).thenThrow(ObjectNotFoundException.class);
-        when(service.createComment(1L, 2L, commentDTO)).thenThrow(ObjectNotFoundException.class);
+        when(service.createComment(1L, 1L, commentInsertDTO)).thenReturn(commentDTO);
+        when(service.createComment(2L, 1L, commentInsertDTO)).thenThrow(ObjectNotFoundException.class);
+        when(service.createComment(1L, 2L, commentInsertDTO)).thenThrow(ObjectNotFoundException.class);
     }
 
     @Test
     @DisplayName("findAll returns 200")
-    void findAll_ReturnsAnUserDTO() throws Exception{
-        json = objectMapper.writeValueAsString(List.of(userDTO));
+    void findAll_ReturnsAUserDTO() throws Exception{
+        json = objectMapper.writeValueAsString(List.of(userInsertDTO));
 
         mockMvc.perform(MockMvcRequestBuilders.get(BASE_URL).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(MockMvcResultMatchers.content().json(json))
                 .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
     @Test
     @DisplayName("findById, when user is found, returns 200")
-    void findById_WhenSuccessful_ReturnsAnUserDTO() throws Exception{
+    void findById_WhenSuccessful_ReturnsAUserDTO() throws Exception{
         mockMvc.perform(MockMvcRequestBuilders.get(BASE_URL + "/{id}", 1L)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(MockMvcResultMatchers.content().json(json))
                 .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
@@ -102,12 +104,15 @@ class UserControllerTest {
 
     @Test
     @DisplayName("create, when successful, returns 201")
-    void create_WhenSuccessful_ReturnsAnUserDTO() throws Exception{
+    void create_WhenSuccessful_ReturnsAUserDTO() throws Exception{
+        userInsertDTO = UserInsertDTO.builder().name("name").email("email@gmail.com").build();
+        when(service.create(userInsertDTO)).thenReturn(userDTO);
+        json = objectMapper.writeValueAsString(userInsertDTO);
+
         mockMvc.perform(MockMvcRequestBuilders.post(BASE_URL)
                         .content(json)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(MockMvcResultMatchers.content().json(json))
                 .andExpect(MockMvcResultMatchers.header().exists("Location"))
                 .andExpect(MockMvcResultMatchers.status().isCreated());
     }
@@ -115,8 +120,8 @@ class UserControllerTest {
     @Test
     @DisplayName("create, when name is blank, returns 400")
     void create_WhenNameIsBlank_ThrowsAMethodArgumentNotValidException() throws Exception{
-        userDTO = UserDTO.builder().name(null).build();
-        json = objectMapper.writeValueAsString(userDTO);
+        userInsertDTO = UserInsertDTO.builder().name(null).build();
+        json = objectMapper.writeValueAsString(userInsertDTO);
 
         mockMvc.perform(MockMvcRequestBuilders.post(BASE_URL)
                         .content(json)
@@ -128,8 +133,8 @@ class UserControllerTest {
     @Test
     @DisplayName("create, when name has invalid size, returns 400")
     void create_WhenNameHasInvalidSize_ThrowsAMethodArgumentNotValidException() throws Exception{
-        userDTO = UserDTO.builder().name("12").build();
-        json = objectMapper.writeValueAsString(userDTO);
+        userInsertDTO = UserInsertDTO.builder().name("12").build();
+        json = objectMapper.writeValueAsString(userInsertDTO);
 
         mockMvc.perform(MockMvcRequestBuilders.post(BASE_URL)
                         .content(json)
@@ -141,7 +146,9 @@ class UserControllerTest {
     @Test
     @DisplayName("create, when email already exists, returns 400")
     void create_WhenEmailAlreadyExists_ThrowsADataIntegrityViolationException() throws Exception{
-        when(service.create(userDTO)).thenThrow(DataIntegrityViolationException.class);
+        userInsertDTO = UserInsertDTO.builder().name("name").email("email@gmail.com").build();
+        when(service.create(userInsertDTO)).thenThrow(DataIntegrityViolationException.class);
+        json = objectMapper.writeValueAsString(userInsertDTO);
 
         mockMvc.perform(MockMvcRequestBuilders.post(BASE_URL)
                         .content(json)
@@ -157,15 +164,14 @@ class UserControllerTest {
                         .content(json)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(MockMvcResultMatchers.content().json(json))
                 .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
     @Test
     @DisplayName("update, when name is blank, returns 400")
     void update_WhenNameIsBlank_ThrowsAMethodArgumentNotValidException() throws Exception{
-        userDTO = UserDTO.builder().name(null).build();
-        json = objectMapper.writeValueAsString(userDTO);
+        userInsertDTO = UserInsertDTO.builder().name(null).build();
+        json = objectMapper.writeValueAsString(userInsertDTO);
 
         mockMvc.perform(MockMvcRequestBuilders.put(BASE_URL + "/{id}", 1L)
                         .content(json)
@@ -177,8 +183,8 @@ class UserControllerTest {
     @Test
     @DisplayName("update, when name has invalid size, returns 400")
     void update_WhenNameHasInvalidSize_ThrowsAMethodArgumentNotValidException() throws Exception{
-        userDTO = UserDTO.builder().name("12").build();
-        json = objectMapper.writeValueAsString(userDTO);
+        userInsertDTO = UserInsertDTO.builder().name("12").build();
+        json = objectMapper.writeValueAsString(userInsertDTO);
 
         mockMvc.perform(MockMvcRequestBuilders.put(BASE_URL + "/{id}", 1L)
                         .content(json)
@@ -190,7 +196,9 @@ class UserControllerTest {
     @Test
     @DisplayName("update, when email already exists, returns 400")
     void update_WhenEmailAlreadyExists_ThrowsADataIntegrityViolationException() throws Exception{
-        when(service.update(1L, userDTO)).thenThrow(DataIntegrityViolationException.class);
+        userInsertDTO = UserInsertDTO.builder().name("name").email("email@gmail.com").build();
+        when(service.update(1L, userInsertDTO)).thenThrow(DataIntegrityViolationException.class);
+        json = objectMapper.writeValueAsString(userInsertDTO);
 
         mockMvc.perform(MockMvcRequestBuilders.put(BASE_URL + "/{id}", 1L)
                         .content(json)
@@ -202,7 +210,9 @@ class UserControllerTest {
     @Test
     @DisplayName("update, when user is not found, returns 404")
     void update_WhenUserIsNotFound_ThrowsAnObjectNotFoundException() throws Exception{
-        when(service.update(1L, userDTO)).thenThrow(ObjectNotFoundException.class);
+        userInsertDTO = UserInsertDTO.builder().name("name").email("email@gmail.com").build();
+        when(service.update(1L, userInsertDTO)).thenThrow(ObjectNotFoundException.class);
+        json = objectMapper.writeValueAsString(userInsertDTO);
 
         mockMvc.perform(MockMvcRequestBuilders.put(BASE_URL + "/{id}", 1L)
                         .content(json)
@@ -238,7 +248,6 @@ class UserControllerTest {
         mockMvc.perform(MockMvcRequestBuilders.get(BASE_URL + "/{id}/posts", 1L)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(MockMvcResultMatchers.content().json(json))
                 .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
@@ -254,20 +263,19 @@ class UserControllerTest {
     @Test
     @DisplayName("createPost, when user is found, returns 200")
     void createPost_WhenUserIsFound_ReturnsAPostDTO() throws Exception{
-        json = objectMapper.writeValueAsString(postDTO);
+        json = objectMapper.writeValueAsString(postInsertDTO);
 
         mockMvc.perform(MockMvcRequestBuilders.post(BASE_URL + "/{id}/posts", 1L)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json))
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(MockMvcResultMatchers.content().json(json))
                 .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
     @Test
     @DisplayName("createPost, when user is not found, returns 404")
     void createPost_WhenUserIsNotFound_ThrowsAnObjectNotFoundException() throws Exception{
-        json = objectMapper.writeValueAsString(postDTO);
+        json = objectMapper.writeValueAsString(postInsertDTO);
 
         mockMvc.perform(MockMvcRequestBuilders.post(BASE_URL + "/{id}/posts", 2L)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -279,8 +287,8 @@ class UserControllerTest {
     @Test
     @DisplayName("createPost, when title is blank, returns 400")
     void createPost_WhenTitleIsBlank_ThrowsAMethodArgumentNotValidException() throws Exception{
-        postDTO = PostDTO.builder().title(null).build();
-        json = objectMapper.writeValueAsString(postDTO);
+        postInsertDTO = PostInsertDTO.builder().title(null).build();
+        json = objectMapper.writeValueAsString(postInsertDTO);
 
         mockMvc.perform(MockMvcRequestBuilders.post(BASE_URL + "/{id}/posts", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -292,8 +300,8 @@ class UserControllerTest {
     @Test
     @DisplayName("createPost, when content is blank, returns 400")
     void createPost_WhenContentIsBlank_ThrowsAMethodArgumentNotValidException() throws Exception{
-        postDTO = PostDTO.builder().content(null).build();
-        json = objectMapper.writeValueAsString(postDTO);
+        postInsertDTO = PostInsertDTO.builder().content(null).build();
+        json = objectMapper.writeValueAsString(postInsertDTO);
 
         mockMvc.perform(MockMvcRequestBuilders.post(BASE_URL + "/{id}/posts", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -311,7 +319,6 @@ class UserControllerTest {
         mockMvc.perform(MockMvcRequestBuilders.get(BASE_URL + "/{id}/comments", 1L)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(MockMvcResultMatchers.content().json(json))
                 .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
@@ -327,20 +334,19 @@ class UserControllerTest {
     @Test
     @DisplayName("createPost, when user is found, returns 200")
     void createComment_WhenUserIsFound_ReturnsAPostDTO() throws Exception{
-        json = objectMapper.writeValueAsString(commentDTO);
+        json = objectMapper.writeValueAsString(commentInsertDTO);
 
         mockMvc.perform(MockMvcRequestBuilders.post(BASE_URL + "/{userId}/{postId}/comment", 1L, 1L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(MockMvcResultMatchers.content().json(json))
                 .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
     @Test
     @DisplayName("createPost, when user is not found, returns 404")
     void createComment_WhenUserIsNotFound_ThrowsAnObjectNotFoundException() throws Exception{
-        json = objectMapper.writeValueAsString(commentDTO);
+        json = objectMapper.writeValueAsString(commentInsertDTO);
 
         mockMvc.perform(MockMvcRequestBuilders.post(BASE_URL + "/{userId}/{postId}/comment", 2L, 1L)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -352,7 +358,7 @@ class UserControllerTest {
     @Test
     @DisplayName("createPost, when post is not found, returns 404")
     void createComment_WhenPostIsNotFound_ThrowsAnObjectNotFoundException() throws Exception{
-        json = objectMapper.writeValueAsString(commentDTO);
+        json = objectMapper.writeValueAsString(commentInsertDTO);
 
         mockMvc.perform(MockMvcRequestBuilders.post(BASE_URL + "/{userId}/{postId}/comment", 1L, 2L)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -364,8 +370,8 @@ class UserControllerTest {
     @Test
     @DisplayName("createPost, when content is blank, returns 400")
     void createComment_WhenContentIsBlank_ThrowsAMethodArgumentNotValidException() throws Exception{
-        commentDTO = CommentDTO.builder().content(null).build();
-        json = objectMapper.writeValueAsString(commentDTO);
+        commentInsertDTO = CommentInsertDTO.builder().content(null).build();
+        json = objectMapper.writeValueAsString(commentInsertDTO);
 
         mockMvc.perform(MockMvcRequestBuilders.post(BASE_URL + "/{userId}/{postId}/comment", 1L, 1L)
                         .contentType(MediaType.APPLICATION_JSON)

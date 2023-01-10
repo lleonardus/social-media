@@ -1,8 +1,6 @@
 package com.leonardus.socialmedia.controller;
 
-import com.leonardus.socialmedia.dtos.CommentDTO;
-import com.leonardus.socialmedia.dtos.PostDTO;
-import com.leonardus.socialmedia.dtos.UserDTO;
+import com.leonardus.socialmedia.dtos.*;
 import com.leonardus.socialmedia.service.UserService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -30,8 +28,8 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<UserDTO> create(@RequestBody @Valid UserDTO userDTO){
-        UserDTO user = userService.create(userDTO);
+    public ResponseEntity<UserDTO> create(@RequestBody @Valid UserInsertDTO userInsertDTO){
+        UserDTO user = userService.create(userInsertDTO);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequestUri()
                 .path("/{id}").buildAndExpand(user.getId()).toUri();
 
@@ -39,8 +37,8 @@ public class UserController {
     }
 
     @PutMapping("/{userId}")
-    public ResponseEntity<UserDTO> update(@PathVariable Long userId, @RequestBody @Valid UserDTO userDTO){
-        return ResponseEntity.ok().body(userService.update(userId, userDTO));
+    public ResponseEntity<UserDTO> update(@PathVariable Long userId, @RequestBody @Valid UserInsertDTO userInsertDTO){
+        return ResponseEntity.ok().body(userService.update(userId, userInsertDTO));
     }
 
     @DeleteMapping("/{userId}")
@@ -56,8 +54,8 @@ public class UserController {
     }
 
     @PostMapping("/{userId}/posts")
-    public ResponseEntity<PostDTO> createPost(@PathVariable Long userId, @RequestBody @Valid PostDTO postDTO){
-        return ResponseEntity.ok().body(userService.createPost(userId, postDTO));
+    public ResponseEntity<PostDTO> createPost(@PathVariable Long userId, @RequestBody @Valid PostInsertDTO postInsertDTO){
+        return ResponseEntity.ok().body(userService.createPost(userId, postInsertDTO));
     }
 
     @GetMapping("/{userId}/comments")
@@ -67,7 +65,7 @@ public class UserController {
 
     @PostMapping("/{userId}/{postId}/comment")
     public ResponseEntity<CommentDTO> createComment(@PathVariable Long userId, @PathVariable Long postId,
-                                                    @RequestBody @Valid CommentDTO commentDTO){
-        return ResponseEntity.ok().body(userService.createComment(userId, postId, commentDTO));
+                                                    @RequestBody @Valid CommentInsertDTO commentInsertDTO){
+        return ResponseEntity.ok().body(userService.createComment(userId, postId, commentInsertDTO));
     }
 }

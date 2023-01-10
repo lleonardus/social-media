@@ -1,6 +1,7 @@
 package com.leonardus.socialmedia.factory;
 
 import com.leonardus.socialmedia.dtos.PostDTO;
+import com.leonardus.socialmedia.dtos.PostInsertDTO;
 import com.leonardus.socialmedia.entities.Post;
 
 import java.util.ArrayList;
@@ -20,6 +21,13 @@ public class PostFactory {
     public static PostDTO createPostDTO(){
         return PostDTO.builder()
                 .id(1L)
+                .title("title")
+                .content("content")
+                .build();
+    }
+
+    public static PostInsertDTO createPostInsertDTO(){
+        return PostInsertDTO.builder()
                 .title("title")
                 .content("content")
                 .build();

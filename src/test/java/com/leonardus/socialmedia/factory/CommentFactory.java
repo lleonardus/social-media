@@ -1,6 +1,7 @@
 package com.leonardus.socialmedia.factory;
 
 import com.leonardus.socialmedia.dtos.CommentDTO;
+import com.leonardus.socialmedia.dtos.CommentInsertDTO;
 import com.leonardus.socialmedia.entities.Comment;
 
 public class CommentFactory {
@@ -15,6 +16,12 @@ public class CommentFactory {
     public static CommentDTO createCommentDTO(){
         return CommentDTO.builder()
                 .id(1L)
+                .content("content")
+                .build();
+    }
+
+    public static CommentInsertDTO createCommenInsertDTO(){
+        return CommentInsertDTO.builder()
                 .content("content")
                 .build();
     }

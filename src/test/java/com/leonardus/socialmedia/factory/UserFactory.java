@@ -1,6 +1,7 @@
 package com.leonardus.socialmedia.factory;
 
 import com.leonardus.socialmedia.dtos.UserDTO;
+import com.leonardus.socialmedia.dtos.UserInsertDTO;
 import com.leonardus.socialmedia.entities.User;
 
 import java.util.ArrayList;
@@ -20,6 +21,14 @@ public class UserFactory {
 
     public static UserDTO createUserDTO(){
         return UserDTO.builder()
+                .id(1L)
+                .name("name")
+                .email("email@gmail.com")
+                .build();
+    }
+
+    public static UserInsertDTO createUserInsertDTO(){
+        return UserInsertDTO.builder()
                 .id(1L)
                 .name("name")
                 .email("email@gmail.com")

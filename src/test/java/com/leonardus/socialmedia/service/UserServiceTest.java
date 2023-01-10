@@ -1,8 +1,6 @@
 package com.leonardus.socialmedia.service;
 
-import com.leonardus.socialmedia.dtos.CommentDTO;
-import com.leonardus.socialmedia.dtos.PostDTO;
-import com.leonardus.socialmedia.dtos.UserDTO;
+import com.leonardus.socialmedia.dtos.*;
 import com.leonardus.socialmedia.entities.Comment;
 import com.leonardus.socialmedia.entities.Post;
 import com.leonardus.socialmedia.entities.User;
@@ -45,19 +43,25 @@ class UserServiceTest {
 
     User user;
     UserDTO userDTO;
+    UserInsertDTO userInsertDTO;
     Post post;
     PostDTO postDTO;
+    PostInsertDTO postInsertDTO;
     Comment comment;
     CommentDTO commentDTO;
+    CommentInsertDTO commentInsertDTO;
 
     @BeforeEach
     void setUp() {
         user = UserFactory.createUser();
         userDTO = UserFactory.createUserDTO();
+        userInsertDTO = UserFactory.createUserInsertDTO();
         post = PostFactory.createPost();
         postDTO = PostFactory.createPostDTO();
+        postInsertDTO = PostFactory.createPostInsertDTO();
         comment = CommentFactory.createComment();
         commentDTO = CommentFactory.createCommentDTO();
+        commentInsertDTO = CommentFactory.createCommenInsertDTO();
 
         when(userRepository.findAll()).thenReturn(List.of(user));
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
@@ -73,10 +77,13 @@ class UserServiceTest {
 
         when(mapper.map(user, UserDTO.class)).thenReturn(userDTO);
         when(mapper.map(userDTO, User.class)).thenReturn(user);
+        when(mapper.map(userInsertDTO, User.class)).thenReturn(user);
         when(mapper.map(post, PostDTO.class)).thenReturn(postDTO);
         when(mapper.map(postDTO, Post.class)).thenReturn(post);
+        when(mapper.map(postInsertDTO, Post.class)).thenReturn(post);
         when(mapper.map(comment, CommentDTO.class)).thenReturn(commentDTO);
         when(mapper.map(commentDTO, Comment.class)).thenReturn(comment);
+        when(mapper.map(commentInsertDTO, Comment.class)).thenReturn(comment);
     }
 
     @Test
@@ -90,7 +97,7 @@ class UserServiceTest {
 
     @Test
     @DisplayName("findById, when user is found, returns an UserDTO")
-    void findById_WhenSuccessful_ReturnsAnUserDTO() {
+    void findById_WhenSuccessful_ReturnsAUserDTO() {
         UserDTO response = service.findById(1L);
 
         assertNotNull(response);
@@ -105,10 +112,10 @@ class UserServiceTest {
 
     @Test
     @DisplayName("create, when email is unique, returns an UserDTO")
-    void create_WhenEmailIsUnique_ReturnsAnUserDTO() {
+    void create_WhenEmailIsUnique_ReturnsAUserDTO() {
         when(mapper.map(any(), any())).thenReturn(userDTO);
 
-        UserDTO response = service.create(userDTO);
+        UserDTO response = service.create(userInsertDTO);
 
         assertNotNull(response);
         assertEquals(userDTO, response);
@@ -119,7 +126,7 @@ class UserServiceTest {
     void create_WhenEmailIsNotUnique_ThrowsADataIntegrityViolationException() {
         when(userRepository.findByEmail("email@gmail.com")).thenReturn(Optional.of(User.builder().id(2L).build()));
 
-        assertThrows(DataIntegrityViolationException.class, () -> service.create(userDTO));
+        assertThrows(DataIntegrityViolationException.class, () -> service.create(userInsertDTO));
     }
 
     @Test
@@ -128,7 +135,7 @@ class UserServiceTest {
         userDTO.setName("new name");
         userDTO.setEmail("new email");
 
-        UserDTO response = service.update(1L, userDTO);
+        UserDTO response = service.update(1L, userInsertDTO);
 
         assertNotNull(response);
         assertEquals(userDTO, response);
@@ -139,13 +146,13 @@ class UserServiceTest {
     void update_WhenEmailIsNotUnique_ThrowsADataIntegrityViolationException() {
         when(userRepository.findByEmail("email@gmail.com")).thenReturn(Optional.of(User.builder().id(2L).build()));
 
-        assertThrows(DataIntegrityViolationException.class, () -> service.update(1L, userDTO));
+        assertThrows(DataIntegrityViolationException.class, () -> service.update(1L, userInsertDTO));
     }
 
     @Test
     @DisplayName("update, when user is not found, throws an ObjectNotFoundException")
     void update_WhenUserIsNotFound_ThrowsAnObjectNotFoundException(){
-        assertThrows(ObjectNotFoundException.class, () -> service.update(2L, userDTO));
+        assertThrows(ObjectNotFoundException.class, () -> service.update(2L, userInsertDTO));
     }
 
     @Test
@@ -179,7 +186,7 @@ class UserServiceTest {
     @Test
     @DisplayName("createPost, when user is found, returns a PostDTO")
     void createPost_WhenSuccessful_ReturnsAPostDTO() {
-        PostDTO response = service.createPost(1L, postDTO);
+        PostDTO response = service.createPost(1L, postInsertDTO);
 
         assertNotNull(response);
         assertEquals(postDTO, response);
@@ -188,7 +195,7 @@ class UserServiceTest {
     @Test
     @DisplayName("createPost, when users is not found, throws an ObjectNotFoundException")
     void createPost_WhenNotSuccessful_ThrowsAnObjectNotFoundException() {
-        assertThrows(ObjectNotFoundException.class, () -> service.createPost(2L, postDTO));
+        assertThrows(ObjectNotFoundException.class, () -> service.createPost(2L, postInsertDTO));
     }
 
     @Test
@@ -210,7 +217,7 @@ class UserServiceTest {
     @Test
     @DisplayName("createComment, when user is found, returns a CommentDTO")
     void createComment_WhenSuccessful_ReturnsACommentDTO() {
-        CommentDTO response = service.createComment(1L, 1L, commentDTO);
+        CommentDTO response = service.createComment(1L, 1L, commentInsertDTO);
 
         assertNotNull(response);
         assertEquals(commentDTO, response);
@@ -219,12 +226,12 @@ class UserServiceTest {
     @Test
     @DisplayName("createComment, when user is not found, throws an ObjectNotFoundException")
     void createComment_WhenUserIsNotFound_ThrowsAnObjectNotFoundException() {
-        assertThrows(ObjectNotFoundException.class, () -> service.createComment(2L, 1L, commentDTO));
+        assertThrows(ObjectNotFoundException.class, () -> service.createComment(2L, 1L, commentInsertDTO));
     }
 
     @Test
     @DisplayName("createComment, when post is not found, throws an ObjectNotFoundException")
     void createComment_WhenPostIsNotFound_ThrowsAnObjectNotFoundException() {
-        assertThrows(ObjectNotFoundException.class, () -> service.createComment(1L, 2L, commentDTO));
+        assertThrows(ObjectNotFoundException.class, () -> service.createComment(1L, 2L, commentInsertDTO));
     }
 }
