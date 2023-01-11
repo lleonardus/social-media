@@ -158,6 +158,19 @@ class UserControllerTest {
     }
 
     @Test
+    @DisplayName("create, when email is blank, returns 400")
+    void create_WhenEmailIsBlank_ThrowsAMethodArgumentNotValidException() throws Exception{
+        userInsertDTO = UserInsertDTO.builder().email("").build();
+        json = objectMapper.writeValueAsString(userInsertDTO);
+
+        mockMvc.perform(MockMvcRequestBuilders.post(BASE_URL)
+                        .content(json)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
+    }
+
+    @Test
     @DisplayName("update, when successful, returns 200")
     void update_WhenSuccessful_ReturnsAnUpdatedUserDTO() throws Exception{
         mockMvc.perform(MockMvcRequestBuilders.put(BASE_URL + "/{id}", 1L)

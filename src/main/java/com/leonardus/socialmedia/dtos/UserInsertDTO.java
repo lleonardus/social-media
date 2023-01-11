@@ -20,5 +20,6 @@ public class UserInsertDTO {
     @Length(min = 3, message = "Tha name field must have at least {min} characters")
     private String name;
     @Email(message = "Email not allowed")
+    @NotBlank(message = "The email field must not be blank")
     private String email;
 }
