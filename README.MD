@@ -26,7 +26,8 @@ $ cd social-media
 $ docker-compose up
 ```
 
-Após esse processo, a API vai estar rodando em **http://localhost:8080**.
+Após esse processo, a API vai estar rodando em **http://localhost:8080**
+e a documentação estará disponível em **http://localhost:8080/swagger-ui.html**.
 
 </details>
 
@@ -44,8 +45,9 @@ $ cd social-media
 $ ./mvnw spring-boot:run
 ```
 
-Após esse processo, a API vai estar rodando em **http://localhost:8080**
-e o banco de dados (H2 database) pode ser acessado em **http://localhost:8080/h2-console/**
+Após esse processo, a API vai estar rodando em **http://localhost:8080**,
+a documentação estará disponível em **http://localhost:8080/swagger-ui.html**
+e o banco de dados (H2 database) poderá ser acessado em **http://localhost:8080/h2-console/**
 
 </details>
 
@@ -77,5 +79,6 @@ para testar a API. Caso queira fazer alguma alteração nesses dados, basta alte
 - Spring Web
 - Spring Data JPA
 - H2 Database
+- SpringDoc OpenAPI
 - Lombok
 - Model Mapper
