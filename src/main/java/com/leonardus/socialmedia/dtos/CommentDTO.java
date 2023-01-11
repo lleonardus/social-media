@@ -1,6 +1,5 @@
 package com.leonardus.socialmedia.dtos;
 
-import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,7 +13,6 @@ import java.time.LocalDateTime;
 @Builder
 public class CommentDTO {
     private Long id;
-    @NotBlank(message = "The content field must not be blank")
     private String content;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
