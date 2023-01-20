@@ -10,7 +10,7 @@ Através dessa API é possível cadastrar usuários, fazer posts e também comen
 
 - **Git**;
 - **Docker + Docker-Compose (caso queira utilizar Docker)**;
-- **Java 17 (caso queira utilizar o Maven)**
+- **Java 17 + Maven (caso queira utilizar o Maven)**
 
 <details>
     <summary><b>🐳Utilizando Docker</b></summary>
@@ -42,7 +42,7 @@ $ git clone https://github.com/lleonardus/social-media.git
 $ cd social-media
 
 # Inicie o projeto usando Maven
-$ ./mvnw spring-boot:run
+$ mvn spring-boot:run
 ```
 
 Após esse processo, a API vai estar rodando em **http://localhost:8080**,
@@ -50,6 +50,9 @@ a documentação estará disponível em **http://localhost:8080/swagger-ui.html*
 e o banco de dados (H2 database) poderá ser acessado em **http://localhost:8080/h2-console/**
 
 </details>
+
+Obs: Caso não queira utilizar nenhumas das opções acima, ainda é possível rodar o projeto utilizando
+uma IDE da sua preferência (Intellij, Eclipse...)
 
 ## 💾Banco de Dados
 
